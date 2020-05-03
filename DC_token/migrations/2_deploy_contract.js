@@ -1,5 +1,5 @@
 const DibuToken = artifacts.require("DibuToken");
 
 module.exports = function(deployer) {
-  deployer.deploy(DibuToken);
+  deployer.deploy(DibuToken,1000000);
 };
