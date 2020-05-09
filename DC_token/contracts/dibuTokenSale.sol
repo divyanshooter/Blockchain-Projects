@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 import "./dibuToken.sol";
 
 contract DibuTokenSale {
-    address admin;
+    address payable admin;
     DibuToken public tokenContract;
     uint256 public tokenPrice;
     uint256 public tokenSold;
@@ -25,5 +25,10 @@ contract DibuTokenSale {
         tokenSold += _numberOfTokens;
         emit Sell(msg.sender,_numberOfTokens);
 
+    }
+    function endSale() public {
+        require(msg.sender==admin);
+        require(tokenContract.transfer(admin,tokenContract.balanceOf(address(this))));
+        selfdestruct(admin);
     }
 }

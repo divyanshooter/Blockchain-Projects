@@ -53,4 +53,22 @@ contract('DibuTokenSale',function(accounts){
        
      }); 
 
+     it('end token sale', async function(){
+      const tokenInstance= await DibuToken.deployed();
+      tokenSaleInstance= await DibuTokenSale.deployed();
+      try{
+        await tokenSaleInstance.endSale({from:buyer});
+        assert.fail();
+
+      }
+      catch(error){
+        assert(error.message.indexOf('revert')>=0, 'must be admin to end Sale');
+      }
+      var receipt=await tokenSaleInstance.endSale({from:admin});
+      const balance=await tokenInstance.balanceOf(admin);
+      assert.equal(balance.toNumber(),999990,'returns all unsold dibu tokens to admin');
+
+      
+     });
+
 });
