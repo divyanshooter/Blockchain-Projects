@@ -2,6 +2,10 @@ App={
     web3Provider:null,
     contracts:{},
     account:"0x0",
+    loading:false,
+    tokenPrice:1000000000000000,
+    tokensSold:0,
+    tokensAvailable:750000,
     init:function(){
         console.log('App initialized...');
         return App.initWeb3();
@@ -19,7 +23,7 @@ App={
         return App.initContracts();
     },
     initContracts:function(){
-        $.getJSON("dibuTokenSale.json",function(dibuTokenSale){
+        $.getJSON("DibuTokenSale.json",function(dibuTokenSale){
             App.contracts.DibuTokenSale=TruffleContract(dibuTokenSale);
             App.contracts.DibuTokenSale.setProvider(App.web3Provider);
             App.contracts.DibuTokenSale.deployed().then(function(dibuTokenSale){
@@ -37,6 +41,15 @@ App={
     });
   },
   render:function(){
+      if(App.loading) {
+          return;
+      }
+      App.loading=true;
+      var loader=$('#loader');
+      var content=$('#content');
+      loader.show();
+      content.hide();
+      var dibuTokenSaleInstance;
     web3.eth.getCoinbase(function(err,account){
         if(err===null){
             console.log(account);
@@ -44,6 +57,32 @@ App={
             $('#accountAddress').html("Your Account:  "+ account);
         }   
     })
+    App.contracts.DibuTokenSale.deployed().then(function(instance){
+        dibuTokenSaleInstance=instance;
+        console.log(instance);
+        return dibuTokenSaleInstance.tokenPrice();
+    }).then(function(tokenPrice){
+         App.tokenPrice=tokenPrice;
+        console.log(tokenPrice);
+        $('.token-price').html(web3.fromWei(App.tokenPrice,"ether").toNumber());
+        return dibuTokenSaleInstance.tokenSold();
+    }).then(function(tokenSold){
+        App.tokensSold=tokenSold.toNumber();
+        $('.tokens-sold').html(App.tokensSold);
+        $('.tokens-available').html(App.tokensAvailable);
+        var progressPercent=(App.tokensSold/App.tokensAvailable)*100;
+        $('#progress').css('width',progressPercent+'%');
+        App.contracts.DibuToken.deployed().then(function(instance){
+            dibuTokenInstance=instance;
+            return dibuTokenInstance.balanceOf(App.account);
+        }).then(function(balance){
+             $('.dibu-balance').html(balance.toNumber());
+        })
+    });
+        App.loading=false;
+        loader.hide();
+        content.show();
+    
   }
 }
 
