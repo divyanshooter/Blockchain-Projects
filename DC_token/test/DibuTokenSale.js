@@ -17,6 +17,7 @@ contract('DibuTokenSale',function(accounts){
        const tokenContract=await tokenSaleInstance.tokenContract();
        assert.notEqual(tokenContract,0x0,'has token contract address');
        const price=await tokenSaleInstance.tokenPrice();
+       console.log(price.toNumber());
        assert.equal(price,tokenPrice,'token price is correct');
      });
 
